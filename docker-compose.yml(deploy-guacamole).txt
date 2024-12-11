@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  guacd:
+    image: guacamole/guacd:latest
+    container_name: guacd
+    ports:
+      - "4822:4822" # Default guacd port
+
+  guacamole:
+    image: guacamole/guacamole:latest
+    depends_on:
+      - guacd
+    environment:
+      # OPENID Configuration
+      OPENID_AUTHORIZATION_ENDPOINT: http://192.168.249.104:8080/realms/remote/protocol/openid-connect/auth
+      OPENID_JWKS_ENDPOINT: http://192.168.249.104:8080/realms/remote/protocol/openid-connect/certs
+      OPENID_ISSUER: http://192.168.249.104:8080/realms/remote
+      OPENID_CLIENT_ID: remote
+      OPENID_REDIRECT_URI: http://192.168.249.104:8081/guacamole/
+      EXTENSION_PRIORITY: "*,openid"
+      GUACD_HOSTNAME: guacd # Link to the guacd container
+    ports:
+      - "8081:8080" # Map Guacamole to port 8081 on the host
