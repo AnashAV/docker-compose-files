@@ -1,0 +1,12 @@
+{
+  "realm": "remote",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "remote",
+      "redirectUris": ["http://192.168.249.114:8081/guacamole/*"],
+      "protocol": "openid-connect"
+    }
+  ]
+}
+

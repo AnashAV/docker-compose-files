@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  guacd:
+    image: guacamole/guacd:latest
+    container_name: guacd
+    ports:
+      - "4822:4822" # Default guacd port
+
+  guacamole:
+    image: guacamole/guacamole:latest
+    depends_on:
+      - guacd
+      - keycloak
+    environment:
+      # OPENID Configuration
+      OPENID_AUTHORIZATION_ENDPOINT: http://192.168.249.114:8080/realms/remote1/protocol/openid-connect/auth 
+      OPENID_JWKS_ENDPOINT: http://192.168.249.114:8080/realms/remote1/protocol/openid-connect/certs 
+      OPENID_ISSUER: http://192.168.249.114:8080/realms/remote1 
+      OPENID_CLIENT_ID: remote1
+      OPENID_REDIRECT_URI: http://192.168.249.114:8081/guacamole/ 
+      EXTENSION_PRIORITY: "*,openid"
+      GUACD_HOSTNAME: guacd # Link to the guacd container
+    ports:
+      - "8081:8080" # Map Guacamole to port 8081 on the host
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    container_name: keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    command: start-dev --import-realm
+    ports:
+      - "8080:8080" # Map Keycloak to port 8080 on the host
+    volumes:
+      - ./realm-export.json:/opt/keycloak/data/import/realm-export.json
+      - keycloak_data:/opt/keycloak/data
+
+volumes:
+  keycloak_data:
+
